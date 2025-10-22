@@ -4,7 +4,7 @@
 
 #include <asm.h>
 #include <segment.h>
-
+#include "errno.h"
 
 /**************************************************/
 /**** Save & Restore ******************************/
@@ -67,10 +67,25 @@
 /*End Of Interruption*/
 #define EOI \
       movb $0x20, %al ; \
-      outb %al, $0x20
+      outb %al, $0x20;
 
 
 /*Handler system implemented*/
+
+ENTRY(system_call_handler)
+      SAVE_ALL                            // Save the current context
+      cmpl $0, %EAX                       // Is syscall number negative?
+      jl err                              // If it is, jump to return an error
+      cmpl $MAX_SYSCALL, %EAX             // Is syscall greater than MAX_SYSCALL (4)?
+      jg err                              // If it is, jump to return an error
+      call *sys_call_table(, %EAX, 0x04)  // Call the corresponding service routine
+      jmp fin                             // Finish
+err: 
+      movl $-ENOSYS, %EAX                 // Move to EAX the ENOSYS error
+fin: 
+      movl %EAX, 0x18(%esp)               // Change the EAX value in the stack
+      RESTORE_ALL                         // Restore the context
+      iret
 
 ENTRY(keyboard_handler)
       SAVE_ALL
@@ -91,7 +106,6 @@ ENTRY(my_page_fault_handler)
       
       #SAVE_ALL
       #EOI
-      
       call my_page_fault_routine; #infite loop
       #RESTORE_ALL
       #/* addl $4,%esp // pop the error code (only certain for exceptions) */

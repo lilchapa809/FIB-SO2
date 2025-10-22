@@ -29,6 +29,10 @@ char char_map[] =
   '\0','\0'
 };
 
+/* Ticks since the system started */
+int zeos_ticks = 0;
+
+
 void setInterruptHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 {
   /***********************************************************************/
@@ -92,7 +96,6 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 
 
   //Keyboard Routine
-  void keyboard_handler();
   void keyboard_routine(){
     //screen size, 80x25 --> 0x4F, 0x18 screen limits
     unsigned char kb_register = inb(0x60); // Read a byte from 0xXX port
@@ -116,15 +119,14 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 }
 
 //Clock routine
-void clock_handler();
 void clock_routine(){
   //Time goes faster than the real one
+  ++zeos_ticks;
   zeos_show_clock();
+  //printk("Clock Routine activated\n");
 }
 
-
 //Page Fault Routine (already in libzeos.a)
-void my_page_fault_handler();
 void my_page_fault_routine(unsigned int error, unsigned int eip){
   
   //__asm__ __volatile__("mov %%cr2, %0" :: "r" (error_address)); //%cr2(Control Register 2)
@@ -136,19 +138,19 @@ void my_page_fault_routine(unsigned int error, unsigned int eip){
   printk(s);
   printc('\n');
   
-  //2nd HexConvertor
-  //char hex_digits[] = "0123456789ABCDEF";
-  //for (int i = 7; i >= 0; i--) {/*8 HEX digits = 32 bits*/ 
-  //  printc(hex_digits[(eip >> (4 * i)) & 0xF]); /*Each digit is 4 bits*/ }
-  
   hex_convertor(error, s);
   printk("                                     Error Code: 0x");
   printk(s);
   printc('\n');
   
+  //2nd HexConvertor
+  //char hex_digits[] = "0123456789ABCDEF";
+  //for (int i = 7; i >= 0; i--) {/*8 HEX digits = 32 bits*/ 
+  //  printc(hex_digits[(eip >> (4 * i)) & 0xF]); /*Each digit is 4 bits*/ }
   
   while(1);  
 }
+
 
 void setIdt()
 {
@@ -163,5 +165,10 @@ void setIdt()
   setInterruptHandler(32, clock_handler, 0);
   setInterruptHandler(14, my_page_fault_handler, 0);
   
+    //0x80 default IDT entry for SystemCalls
+    //Privilege Level 3, user mode
+  setInterruptHandler(0x80, system_call_handler, 3);
+
+
   set_idt_reg(&idtR);
 }

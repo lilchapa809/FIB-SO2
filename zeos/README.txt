@@ -14,3 +14,6 @@ Relevant Files:
             + int maxAccessibleFromPL: Privilege Level (0=MAX, 3=USER)
     }
     interrupt.h --> Declaration of interrupt handlers
+
+System Call:
+    1: Set IDT --> setTrapHandler(0x80, system_call_handler, 3);
