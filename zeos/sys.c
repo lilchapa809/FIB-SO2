@@ -50,12 +50,5 @@ void sys_exit()
 }
 
 int sys_gettime(){
-  int ticks = zeos_ticks;
-  printk("DEBUG: zeos_ticks = "); //print tick number (reversed)
-  while (ticks > 0) {
-          printc('0' + (ticks % 10));
-          ticks /= 10;
-      }  
-  printk("\n");
   return zeos_ticks;
 }

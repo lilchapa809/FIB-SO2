@@ -11,8 +11,7 @@
     pushl %ebp # Save old ebp
     movl %esp, %ebp # Set up new stack frame
 
-    # Follow the ABI contract
-    # Save the registers
+    # Save the registers (ABI contract)
     pushl %ebx; pushl %ecx; pushl %edx;
 
     # No arguments to pass

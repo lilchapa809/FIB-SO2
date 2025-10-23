@@ -15,8 +15,7 @@ ENTRY(gettime)
     pushl %ebp            # Save old ebp 
     movl %esp, %ebp       # Set up new stack frame 
 
-    # Follow the ABI contract 
-    # Save the registers 
+    # Save the registers (ABI contract)
     SAVE_REG
 
     # No arguments to pass 
@@ -26,7 +25,7 @@ ENTRY(gettime)
     
     # Check if it returns an error (negative value) 
     cmpl $0, %eax        # Compare result with 0 
-    jge gettime_end   # If positive or zero, return as is 
+    jge gettime_end      # If positive or zero, return as is 
  
 gettime_error:
     # Handle error case 

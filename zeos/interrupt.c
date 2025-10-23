@@ -123,7 +123,6 @@ void clock_routine(){
   //Time goes faster than the real one
   ++zeos_ticks;
   zeos_show_clock();
-  //printk("Clock Routine activated\n");
 }
 
 //Page Fault Routine (already in libzeos.a)
@@ -142,12 +141,7 @@ void my_page_fault_routine(unsigned int error, unsigned int eip){
   printk("                                     Error Code: 0x");
   printk(s);
   printc('\n');
-  
-  //2nd HexConvertor
-  //char hex_digits[] = "0123456789ABCDEF";
-  //for (int i = 7; i >= 0; i--) {/*8 HEX digits = 32 bits*/ 
-  //  printc(hex_digits[(eip >> (4 * i)) & 0xF]); /*Each digit is 4 bits*/ }
-  
+
   while(1);  
 }
 
@@ -167,7 +161,7 @@ void setIdt()
   
     //0x80 default IDT entry for SystemCalls
     //Privilege Level 3, user mode
-  setInterruptHandler(0x80, system_call_handler, 3);
+  setTrapHandler(0x80, system_call_handler, 3);
 
 
   set_idt_reg(&idtR);
