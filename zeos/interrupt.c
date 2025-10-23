@@ -29,7 +29,7 @@ char char_map[] =
   '\0','\0'
 };
 
-/* Ticks since the system started */
+/** @brief Ticks since the system started */ 
 int zeos_ticks = 0;
 
 
@@ -79,64 +79,95 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 
 
 
-/* Converts an unsigned integer to a hexadecimal string */
-  void hex_convertor(unsigned int address, char *s) {
-    int i;
-    s[8] = '\0';  // Null terminate at position 8 for 8 hex digits
-    for (i = 7; i >= 0; i--) {
-      int digit = address % 16;
-      if (digit < 10) {
-        s[i] = '0' + digit;  // Convert 0-9 to '0'-'9'
-      } else {
-        s[i] = 'A' + digit - 10;  // Convert 10-15 to 'A'-'F'
-      }
-      address /= 16;
+/** 
+* @brief Converts an unsigned integer to a hexadecimal string 
+* @param address Unsigned integer that we want to convert
+* @param s String that will contain each digit of address
+*/
+void hex_convertor(unsigned int address, char *s) 
+{
+  int i;
+  s[8] = '\0';  // Null terminate at position 8 for 8 hex digits
+  for (i = 7; i >= 0; i--) {
+    int digit = address % 16;
+    if (digit < 10) {
+      s[i] = '0' + digit;  // Convert 0-9 to '0'-'9'
+    } else {
+      s[i] = 'A' + digit - 10;  // Convert 10-15 to 'A'-'F'
     }
+    address /= 16;
   }
+}
 
-
-  //Keyboard Routine
-  void keyboard_routine(){
-    //screen size, 80x25 --> 0x4F, 0x18 screen limits
-    unsigned char kb_register = inb(0x60); // Read a byte from 0xXX port
-    unsigned char is_make = kb_register & 0x80; //kb_register[7] --> mask applied 1000 0000
-    unsigned char code = kb_register & 0x7F; //kb_register[6..0] --> mask applied 0111 1111
-    if (!is_make){
-      char to_print = char_map[code];
-      if (to_print != 0) printc_xy(0x00,0x00,to_print);
-      
-      else {
-        //clear screen
-        for (unsigned int i = 0; i < 0x4f; ++i){
-          for (unsigned int j = 0; j < 0x18; ++j){
-          printc_xy(i,j,' ');
+/**
+ * @brief Keyboard interrupt service routine
+ * 
+ * Handles keyboard input by reading the keyboard data port (0x60),
+ * distinguishing between key press (make) and release (break) events,
+ * and displaying the corresponding character on screen.
+ * 
+ * If an unmapped key is pressed, clears the entire screen and displays 'C'.
+ */
+void keyboard_routine()
+{
+  // Screen dimensions: 80 columns (0x4F) x 25 rows (0x18)
+  unsigned char kb_register = inb(0x60); // Read scan code from keyboard data port
+  unsigned char is_make = kb_register & 0x80; //kb_register[7] --> mask applied 1000 0000
+  unsigned char code = kb_register & 0x7F; //kb_register[6..0] --> mask applied 0111 1111
+  if (!is_make){
+    char to_print = char_map[code];
+    if (to_print != 0) printc_xy(0x00,0x00,to_print);
+    
+    else {
+      // Unmapped key pressed - clear entire screen
+      for (unsigned int i = 0; i < 0x4f; ++i){
+        for (unsigned int j = 0; j < 0x18; ++j){
+        printc_xy(i,j,' ');
         }
       }
 
-      printc_xy(0x00,0x00,'C');
+    printc_xy(0x00,0x00,'C');
     }
   }
 }
 
-//Clock routine
-void clock_routine(){
+/**
+ * @brief Clock interrupt service routine
+ * 
+ * Handles timer ticks by incrementing the global tick counter
+ * and updating the on-screen clock display.
+ * Note: Time in Bochs emulator runs faster than real time.
+ */
+void clock_routine()
+{
   //Time goes faster than the real one
   ++zeos_ticks;
   zeos_show_clock();
 }
 
-//Page Fault Routine (already in libzeos.a)
-void my_page_fault_routine(unsigned int error, unsigned int eip){
-  
-  //__asm__ __volatile__("mov %%cr2, %0" :: "r" (error_address)); //%cr2(Control Register 2)
-  //__asm__ __volatile__("movl 0(%%esp), %0" :: "r" (eip));
-  
+/**
+ * @brief Page Fault exception service routine
+ * @param error The error code provided by the CPU describing the fault type
+ * @param eip The instruction pointer value when the page fault occurred
+ * 
+ * Handles page fault exceptions by displaying diagnostic information
+ * about the faulting instruction and error code, then enters an
+ * infinite loop since ZeOS doesn't implement page fault recovery.
+ * 
+ * The faulting address could be retrieved from CR2 register if needed.
+ */
+void my_page_fault_routine(unsigned int error, unsigned int eip)
+{
+
   char s[16];
+
+  // Display the instruction pointer that caused the page fault
   hex_convertor(eip, s);
   printk("Process generates a PAGE FAULT exception at EIP: 0x");
   printk(s);
   printc('\n');
   
+  // Display the page fault error code
   hex_convertor(error, s);
   printk("                                     Error Code: 0x");
   printk(s);

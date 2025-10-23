@@ -49,6 +49,22 @@ void sys_exit()
 {  
 }
 
-int sys_gettime(){
+/**
+ * @brief System call service routine for gettime()
+ * 
+ * Returns the number of clock ticks elapsed since system boot.
+ * Each tick corresponds to one clock interrupt, which occurs
+ * at regular intervals determined by the system timer.
+ * 
+ * This system call allows user programs to measure time intervals
+ * and implement timing-related functionality.
+ * 
+ * @return int - Current value of the zeos_ticks global counter
+ * 
+ * System call number: 10
+ * Wrapper function: gettime() in user space
+ */
+int sys_gettime()
+{
   return zeos_ticks;
 }

@@ -4,7 +4,7 @@ char buff[24];
 
 int pid;
 
-//@brief Gettime Debugger
+//Gettime Debugger
 void test_gettime(){
   //The goal is to generate the page fault before a while(1)
   int t1 = gettime();
@@ -25,6 +25,7 @@ int __attribute__ ((__section__(".text.main")))
 {
   /* Next line, tries to move value 0 to CR3 register. This register is a privileged one, and so it will raise an exception */
   /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
+  
   test_gettime();
-  while(1) { }
+  while(1) {}
 }
