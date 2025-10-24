@@ -1,8 +1,9 @@
+#ifndef __ZEOS_ERRNO_H_
+#define __ZEOS_ERRNO_H_
+
 //Got it from:
 //https://kernel.googlesource.com/pub/scm/linux/kernel/git/nico/archive/+/v0.97/include/linux/errno.h
 
-#ifndef __ZEOS_ERRNO_H_
-#define __ZEOS_ERRNO_H_
 
 #define EPERM            1   /* Operation not permitted */
 #define ENOENT           2   /* No such file or directory */

@@ -5,7 +5,8 @@ char buff[24];
 int pid;
 
 //Gettime Debugger
-void test_gettime(){
+void test_gettime()
+{
   //The goal is to generate the page fault before a while(1)
   int t1 = gettime();
   if (t1 == 0) while(1);
@@ -19,6 +20,12 @@ void test_gettime(){
   *c = 'x';
 }
 
+//Write Debugger
+void test_write()
+{
+  write(1,"Hello World\n",12);
+  write(2,"error",5);
+}
 
 int __attribute__ ((__section__(".text.main")))
   main(void)
@@ -26,6 +33,7 @@ int __attribute__ ((__section__(".text.main")))
   /* Next line, tries to move value 0 to CR3 register. This register is a privileged one, and so it will raise an exception */
   /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
   
-  test_gettime();
+  //test_gettime();
+  test_write();
   while(1) {}
 }

@@ -81,11 +81,11 @@ io.o:io.c $(INCLUDEDIR)/io.h
 
 sched.o:sched.c $(INCLUDEDIR)/sched.h
 
-libc.o:libc.c $(INCLUDEDIR)/libc.h
+libc.o:libc.c $(INCLUDEDIR)/libc.h $(INCLUDEDIR)/errno.h
 
 mm.o:mm.c $(INCLUDEDIR)/types.h $(INCLUDEDIR)/mm.h
 
-sys.o:sys.c $(INCLUDEDIR)/devices.h
+sys.o:sys.c $(INCLUDEDIR)/devices.h $(INCLUDEDIR)/errno.h 
 
 utils.o:utils.c $(INCLUDEDIR)/utils.h
 

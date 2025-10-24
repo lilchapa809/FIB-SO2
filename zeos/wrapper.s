@@ -6,33 +6,51 @@
 # 1 "wrapper.S"
 # 1 "include/asm.h" 1
 # 2 "wrapper.S" 2
-# 14 "wrapper.S"
-.globl gettime; .type gettime, @function; .align 0; gettime:
-    pushl %ebp # Save old ebp
-    movl %esp, %ebp # Set up new stack frame
-
-    # Save the registers (ABI contract)
+# 13 "wrapper.S"
+.globl write; .type write, @function; .align 0; write:
+    pushl %ebp
+    movl %esp,%ebp
     pushl %ebx; pushl %ecx; pushl %edx;
 
-    # No arguments to pass
-
-    movl $10, %eax # System call number for gettime (10)
+    movl 8(%ebp), %edx
+    movl 12(%ebp), %ecx
+    movl 16(%ebp), %ebx
+    movl $4,%eax
     int $0x80
 
-    # Check if it returns an error (negative value)
-    cmpl $0, %eax # Compare result with 0
-    jge gettime_end # If positive or zero, return as is
+    cmpl $0, %eax
+    jge write_end
+
+write_error:
+    negl %eax
+    movl %eax, zeos_errno
+    movl $-1, %eax
+
+write_end:
+    popl %edx; popl %ecx; popl %ebx;
+    movl %ebp, %esp
+    popl %ebp
+    ret
+
+.globl gettime; .type gettime, @function; .align 0; gettime:
+    pushl %ebp
+    movl %esp, %ebp
+
+    pushl %ebx; pushl %ecx; pushl %edx;
+
+    movl $10, %eax
+    int $0x80
+
+    cmpl $0, %eax
+    jge gettime_end
 
 gettime_error:
-    # Handle error case
-    negl %eax # Convert to positive value
-    movl %eax, errno # Store error code in errno
-    movl $-1, %eax # Return -1 to indicate error
+    negl %eax
+    movl %eax, zeos_errno
+    movl $-1, %eax
 
 gettime_end:
-    # Restore the registers
     popl %edx; popl %ecx; popl %ebx;
-
-    movl %ebp, %esp # Restore stack pointer
-    popl %ebp # Restore old ebp
-    ret # Return to caller
+    movl %ebp, %esp
+    popl %ebp
+    ret

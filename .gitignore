@@ -1,0 +1,36 @@
+# Object files and binaries
+*.o
+*.out
+*.bin
+
+# Executables
+system
+user
+bootsect
+build
+
+# Intermediate files
+*.s
+*.i
+
+# Bochs files
+bochsout.txt
+parport.out
+
+# Backup and temporary files
+*~
+*.swp
+*.swo
+*.bak
+
+# Debug files
+*.gdb
+*.log
+
+# IDE directories
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db

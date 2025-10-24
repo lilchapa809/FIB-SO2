@@ -13,8 +13,14 @@
 
 #include <sched.h>
 
+#include "errno.h"
+
 #define LECTURA 0
 #define ESCRIPTURA 1
+
+// Buffer 
+#define BUFFER_SIZE 256
+char dest_buffer[BUFFER_SIZE];
 
 /* Referenced in interrupt.c */
 extern int zeos_ticks;
@@ -67,4 +73,62 @@ void sys_exit()
 int sys_gettime()
 {
   return zeos_ticks;
+}
+
+/**
+ * @brief System call service routine for write()
+ * 
+ * Implements the write system call that allows user programs to output
+ * data to supported devices. Currently only supports writing to stdout (fd=1).
+ * 
+ * @param fd File descriptor (must be 1 for stdout in current implementation)
+ * @param buffer Pointer to the user-space buffer containing data to write
+ * @param size Number of bytes to write from the buffer
+ * 
+ * @return int On success, returns the number of bytes written. On error, returns:
+ *            -EBADF (9) for invalid file descriptor
+ *            -EACCES (13) for incorrect permissions  
+ *            -EFAULT (14) for invalid buffer address
+ *            -EINVAL (22) for invalid size parameter
+ * 
+ * System call number: 4
+ * Wrapper function: write() in user space
+ * 
+ * @note Currently only supports writing to console (stdout, 1).
+ */
+int sys_write(int fd, char *buffer, int size)
+{
+  printk("Entered in Sys_write\n");
+  //Parameter Check
+  int error_fd = check_fd(fd,ESCRIPTURA);
+  if (error_fd < 0) {
+    printk("Error Detected!\n");
+    return error_fd;
+  }
+  if(buffer == NULL) return -14; //EFAULT
+  if (size < 0) return -22; //EINVAL
+  
+  int copy_error;
+  int bytes_left = size; //All bytes remaining to be written
+  int bytes_written = 0; //No bytes written yet
+  int buffer_offset = size - bytes_left; //Initialized at 0
+  //We have to limit the size of the destination of copy_from_user
+  while (bytes_left > BUFFER_SIZE)
+  {
+    copy_error = copy_from_user(buffer + buffer_offset, dest_buffer, BUFFER_SIZE);
+    if (copy_error < 0) return -14; //EFAULT
+
+    bytes_written += sys_write_console(dest_buffer,BUFFER_SIZE);
+    bytes_left -= BUFFER_SIZE;
+    buffer_offset += BUFFER_SIZE;
+  }
+
+  if (bytes_left > 0) 
+  {
+    copy_error = copy_from_user(buffer + buffer_offset, dest_buffer, bytes_left);
+    if (copy_error < 0) return -14; //EFAULT
+    bytes_written += sys_write_console(buffer,bytes_left);
+  }
+
+  return bytes_written;
 }

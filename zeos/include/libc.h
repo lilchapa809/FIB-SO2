@@ -22,4 +22,6 @@ void exit();
 
 int gettime();
 
+void perror();
+
 #endif  /* __LIBC_H__ */
