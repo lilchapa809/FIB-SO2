@@ -169,7 +169,7 @@ void my_page_fault_routine(unsigned int error, unsigned int eip)
   
   // Display the page fault error code
   hex_convertor(error, s);
-  printk("                                     Error Code: 0x");
+  printk("Error Code: 0x");
   printk(s);
   printc('\n');
 
@@ -190,10 +190,14 @@ void setIdt()
   setInterruptHandler(32, clock_handler, 0);
   setInterruptHandler(14, my_page_fault_handler, 0);
   
-    //0x80 default IDT entry for SystemCalls
-    //Privilege Level 3, user mode
+  // 0x80 default IDT entry for SystemCalls
+  // Privilege Level 3, user mode
   setTrapHandler(0x80, system_call_handler, 3);
 
+  // Write MSR registers
+  writeMSR(0x174, __KERNEL_CS); // Operating system code segment (CS)
+  writeMSR(0x175, INITIAL_ESP); // Operating system stack (ESP) 
+  writeMSR(0x176, (DWord)syscall_handler_sysenter);  // Operating system entry point, the handler (EIP)
 
   set_idt_reg(&idtR);
 }

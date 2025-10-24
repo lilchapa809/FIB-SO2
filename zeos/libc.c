@@ -50,40 +50,22 @@ int strlen(char *a)
  */
 void perror(void){
   char error[16];
-
-  // DEBUG: imprimir el valor actual de errno
-  write(1, "DEBUG: errno = ", 15);
-  itoa(errno, error);
-  write(1, error, strlen(error));
-  write(1, "\n", 1);
-  
-  switch (errno)
-  {
-    case EACCES:  
-      write(1, "Permission denied\n", 18);
-      break;
-      
-    case EFAULT:
+  if (errno == EACCES) {
+    write(1, "Permission denied\n", 18);
+  }
+  else if (errno == EFAULT) {
       write(1, "Bad address\n", 12);
-      break;
-
-    case EINVAL:
+  }
+  else if (errno == EINVAL) {
       write(1, "Invalid argument\n", 17);
-      break;
-
-    case EBADF:
+  }
+  else if (errno == EBADF) {
       write(1, "Bad file number\n", 16);
-      break;
-
-    case ENOSYS:
-      write(1, "Function (Syscall) not implemented\n", 25);
-      break;
-    
-    default:
-      itoa(errno, error);
-      write(1, "Unknown error: ", 15);
-      write(1, error, strlen(error));
-      write(1,'\n',1);
-      break;
+  }
+  else if (errno == ENOSYS) {
+      write(1, "Function (Syscall) not implemented\n", 35);
+  }
+  else {
+      write(1, "Unknown error\n", 14);
   }
 }

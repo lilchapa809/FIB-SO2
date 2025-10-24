@@ -80,5 +80,7 @@ void my_page_fault_handler();
  */
 void system_call_handler();
 
+void syscall_handler_sysenter();
+
 
 #endif  /* __INTERRUPT_H__ */
