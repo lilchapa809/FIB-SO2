@@ -1,17 +1,25 @@
+#Git Ignore
+.gitignore
 # Object files and binaries
 *.o
+*.s
 *.out
 *.bin
+*.a
 
 # Executables
 system
 user
 bootsect
 build
+zeos.bin
 
-# Intermediate files
-*.s
-*.i
+# Config files
+.bochsrc*
+.gdbcmd
+
+# IDE directories
+.vscode/
 
 # Bochs files
 bochsout.txt
@@ -26,10 +34,6 @@ parport.out
 # Debug files
 *.gdb
 *.log
-
-# IDE directories
-.vscode/
-.idea/
 
 # System files
 .DS_Store
