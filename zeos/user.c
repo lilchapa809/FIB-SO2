@@ -23,8 +23,9 @@ void test_gettime()
 //Write Debugger
 void test_write()
 {
-  write(1,"Hello World\n",12);
-  write(2,"error",5);
+  if (write(1,"Hello World\n",12)!=12) perror();
+  if (write(2,"error",5)<0) perror(); 
+
 }
 
 int __attribute__ ((__section__(".text.main")))

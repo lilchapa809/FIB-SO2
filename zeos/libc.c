@@ -8,7 +8,7 @@
 
 #include "errno.h"
 
-int zeos_errno;
+int errno;
 
 void itoa(int a, char *b)
 {
@@ -46,12 +46,18 @@ int strlen(char *a)
 }
 
 /**
- * @brief Prints the error message corresponding to the current zeos_errno value
+ * @brief Prints the error message corresponding to the current errno value
  */
 void perror(void){
   char error[16];
+
+  // DEBUG: imprimir el valor actual de errno
+  write(1, "DEBUG: errno = ", 15);
+  itoa(errno, error);
+  write(1, error, strlen(error));
+  write(1, "\n", 1);
   
-  switch (zeos_errno)
+  switch (errno)
   {
     case EACCES:  
       write(1, "Permission denied\n", 18);
@@ -74,9 +80,10 @@ void perror(void){
       break;
     
     default:
-      itoa(zeos_errno, error);
+      itoa(errno, error);
       write(1, "Unknown error: ", 15);
       write(1, error, strlen(error));
+      write(1,'\n',1);
       break;
   }
 }

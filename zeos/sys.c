@@ -98,11 +98,9 @@ int sys_gettime()
  */
 int sys_write(int fd, char *buffer, int size)
 {
-  printk("Entered in Sys_write\n");
   //Parameter Check
   int error_fd = check_fd(fd,ESCRIPTURA);
   if (error_fd < 0) {
-    printk("Error Detected!\n");
     return error_fd;
   }
   if(buffer == NULL) return -14; //EFAULT

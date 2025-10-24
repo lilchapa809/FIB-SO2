@@ -26,7 +26,7 @@ ENTRY(write)
 
 write_error: 
     negl %eax  
-    movl %eax, zeos_errno  
+    movl %eax, errno  
     movl $-1, %eax  
 
 write_end:
@@ -49,7 +49,7 @@ ENTRY(gettime)
  
 gettime_error:
     negl %eax // Convert to positive value 
-    movl %eax, zeos_errno // Store error code in zeos_errno 
+    movl %eax, errno // Store error code in errno 
     movl $-1, %eax // Return -1 to indicate error    
 
 gettime_end:
