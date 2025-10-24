@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "zeos_interrupt.h": "c",
-        "io.h": "c"
-    }
-}
