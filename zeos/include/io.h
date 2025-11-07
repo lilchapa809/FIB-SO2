@@ -15,4 +15,6 @@ void printc(char c);
 void printc_xy(Byte x, Byte y, char c);
 void printk(char *string);
 
+void clear_screen();
+
 #endif  /* __IO_H__ */

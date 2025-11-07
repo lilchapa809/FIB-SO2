@@ -50,6 +50,7 @@ int strlen(char *a)
  */
 void perror(void){
   char error[16];
+  write (1,"PERROR: ",8);
   if (errno == EACCES) {
     write(1, "Permission denied\n", 18);
   }

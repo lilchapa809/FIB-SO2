@@ -12,11 +12,23 @@
 #define NR_TASKS      10
 #define KERNEL_STACK_SIZE	1024
 
+#define DEFAULT_QUANTUM 100 /** 100 ticks = 1 quantum */
+
 enum state_t { ST_RUN, ST_READY, ST_BLOCKED };
 
 struct task_struct {
   int PID;			/* Process ID. This MUST be the first field of the struct. */
   page_table_entry * dir_pages_baseAddr;
+
+  struct list_head list; /* To enqueue the process in queues */
+  struct list_head kids; /* To enqueue the children in the children list */
+  struct task_struct *parent; /* Pointer to the parent process */
+
+  enum state_t state; /* Process state */
+  int quantum; /* Remaining quantum */
+  int pending_unblocks; /* Number of pending unblocks */
+
+  unsigned long kernel_esp; /* ESP saved during a context switch */
 };
 
 union task_union {
@@ -55,5 +67,22 @@ void sched_next_rr();
 void update_process_state_rr(struct task_struct *t, struct list_head *dest);
 int needs_sched_rr();
 void update_sched_data_rr();
+
+/** 
+ * @brief 
+ * @param
+*/
+void switch_task(long unsigned int *old_esp, unsigned int new_esp);
+
+/**
+ * @brief 
+ * @param
+ */
+void inner_task_switch(union task_union *new);
+
+/**
+ * @brief 
+ */
+void schedule();
 
 #endif  /* __SCHED_H__ */

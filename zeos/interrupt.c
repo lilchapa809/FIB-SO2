@@ -32,6 +32,8 @@ char char_map[] =
 /** @brief Ticks since the system started */ 
 int zeos_ticks = 0;
 
+extern struct task_struct *idle_task;
+extern struct task_struct *task1;
 
 void setInterruptHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 {
@@ -119,13 +121,6 @@ void keyboard_routine()
     if (to_print != 0) printc_xy(0x00,0x00,to_print);
     
     else {
-      // Unmapped key pressed - clear entire screen
-      for (unsigned int i = 0; i < 0x4f; ++i){
-        for (unsigned int j = 0; j < 0x18; ++j){
-        printc_xy(i,j,' ');
-        }
-      }
-
     printc_xy(0x00,0x00,'C');
     }
   }

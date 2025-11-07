@@ -97,7 +97,14 @@ int __attribute__((__section__(".text.main")))
   /* Move user code/data now (after the page table initialization) */
   copy_data((void *) KERNEL_START + *p_sys_size, (void*)L_USER_START, *p_usr_size);
 
-
+  clear_screen(); //Function added by user to clear first bochs messages
+  //Bochs Personalization
+  printk("\n\n\n\n\n\n");
+  printk(" <-- Keyborad Routine Key\n");
+  printk("\n---------------------------------\n");
+  printk("SO2 - ZeOs Project\n");
+  printk("Gerard Chaparro & Albert Porta\n");
+  printk("---------------------------------\n\n");
   printk("Entering user mode...\n");
 
   enable_int();
