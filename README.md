@@ -54,14 +54,39 @@ This repository is organized to separate the educational OS development from the
 
 ```text
 .
-├── 📁 zeos/               # The Educational OS Source Code
-│   ├── entry.S            # Assembly routines for system calls/interrupts
-│   ├── sys.c              # C implementation of system calls
-│   ├── sched.c            # Scheduler logic and process switching
-│   ├── user.c             # User-space program to test the kernel
-│   └── interrupt.c        # IDT and interrupt handling
-├── 📁 linux_concurrency/  # Standard Linux Synchronization
-│   ├── philosophers/      # Solution to Dining Philosophers
-│   └── producer_consumer/ # Shared buffer implementations
-├── 📁 docs/               # Subject Theory & Diagrams
-└── README.md
+├── 📂 E1_E2/                           # Phase 1: Core Kernel Development
+│   └── 📂 zeos/
+│       ├── 📂 include/                 # Kernel Header files (.h)
+│       │   ├── entry.h                 # Defines for saving/restoring context
+│       │   ├── sched.h                 # Task struct & runqueue definitions
+│       │   └── ...
+│       ├── 📜 entry.S                  # (CRITICAL) ASM Interrupt Handlers & Context Switch
+│       ├── 📜 sched.c                  # (CRITICAL) Round Robin Scheduler & Task Management
+│       ├── 📜 sys.c                    # (CRITICAL) System Calls (fork, exit, write, etc.)
+│       ├── 📜 user.c                   # User-space code to test the kernel features
+│       ├── 📜 interrupt.c              # IDT (Interrupt Descriptor Table) setup
+│       ├── 📜 mm.c                     # Memory Management (Paging/Frames)
+│       ├── 📜 system.lds               # Linker script (defines kernel memory map)
+│       └── ...
+│
+├── 📂 EXAM/                            # 25-26Q1 Exam (Time-constrained coding)
+│   ├── 📂 Ex1/                         # Excercise 1: Process management & Scheduling
+│   │   ├── 📂 zeos/
+│   │   │   ├── 📜 p_stats.c            # Custom statistics (CPU usage, blocking time)
+│   │   │   ├── 📜 user-utils.S         # Assembly wrappers for custom syscalls
+│   │   │   └── ...
+│   │   └── 📜 ejercicio1.tar.gz        # Compressed submission
+│   │
+│   └── 📂 Ex2/                         # Excercise 2: Advanced Synchronization
+│       └── 📂 zeos/                    # (Similar kernel structure with extended features)
+│
+├── 📂 GAME/                            # Final Project: "The Game"
+│   └── 📂 zeos/                        # A fully functional OS running a game
+│       ├── 📜 bootsect.S               # Bootloader assembly code
+│       ├── 📜 user.c                   # The Game Logic (Drawing to screen via syscalls)
+│       ├── 📜 devices.c                # Console I/O & Device abstraction
+│       ├── 📜 sys_call_table.S         # Mapping syscall numbers to C functions
+│       ├── ...
+│       └── 📄 Project.pdf              # Documentation of the game mechanics
+│
+└── 📄 README.md                        # Documentation
