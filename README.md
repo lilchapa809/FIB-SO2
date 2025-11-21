@@ -3,26 +3,26 @@
   <h1>💻 Operating Systems II (SO2)</h1>
   
   <p>
-    <strong>Bachelors in Computer Science | Polithecnic University of Catalonia FIB</strong>
+    <strong>Bachelors in Computer Science | [Your University Name]</strong>
   </p>
 
   <p>
     <a href="https://github.com/yourusername/repo/graphs/contributors">
       <img src="https://img.shields.io/badge/Contributors-1-blue?style=for-the-badge" />
     </a>
-    <a href="https://github.com/yourusername/repo/network/members">
-      <img src="https://img.shields.io/badge/Forks-0-orange?style=for-the-badge" />
+    <a href="https://img.shields.io/badge/Language-C-blue?style=for-the-badge&logo=c">
+      <img src="https://img.shields.io/badge/Language-C-blue?style=for-the-badge&logo=c" />
     </a>
-    <a href="https://img.shields.io/badge/Language-C%2FAssembly-green?style=for-the-badge">
-      <img src="https://img.shields.io/badge/Language-C%2FC++-green?style=for-the-badge" />
+    <a href="https://img.shields.io/badge/Language-x86_Assembly-red?style=for-the-badge">
+      <img src="https://img.shields.io/badge/Language-x86_Assembly-red?style=for-the-badge" />
     </a>
-    <a href="https://img.shields.io/badge/OS-Linux-black?style=for-the-badge&logo=linux">
-      <img src="https://img.shields.io/badge/OS-Linux-black?style=for-the-badge&logo=linux" />
+     <a href="https://img.shields.io/badge/OS-Zeos_&_Linux-black?style=for-the-badge&logo=linux">
+      <img src="https://img.shields.io/badge/OS-Zeos_&_Linux-black?style=for-the-badge&logo=linux" />
     </a>
   </p>
   
   <h3> 
-    Explore the depths of Kernel Space, Concurrency, and Memory Management.
+    From User Space Concurrency to Kernel Space Implementation.
   </h3>
 </div>
 
@@ -30,33 +30,38 @@
 
 ## 📖 About The Course
 
-**Operating Systems II (SO2)** focuses on the internal mechanisms of modern operating systems. While the introductory course covered the basics, this subject dives deep into kernel architecture, process scheduling, memory management, and file systems.
+**Operating Systems II (SO2)** bridges the gap between application-level programming and kernel-level architecture. This subject is distinct because it is split into two critical environments:
+
+1.  **Linux (User Space):** Advanced concurrency, synchronization, and process management using POSIX standards.
+2.  **Zeos (Kernel Space):** Development of a small, educational x86 operating system. We implemented the kernel "guts" from a basic skeleton.
 
 
 
-The coursework was developed primarily in a **Linux environment** using **C**, focusing on POSIX standards and low-level system programming.
+### 🧠 Key Learning Modules
 
-### 🧠 Key Concepts Covered
-* **Concurrency & Synchronization:** Mutexes, Semaphores, Monitors, and Deadlock prevention.
-* **Process Management:** Scheduling algorithms (Round Robin, SJF) and context switching.
-* **Memory Management:** Virtual memory, Paging, Segmentation, and TLBs.
-* **File Systems:** Inodes, journaling, and disk scheduling.
-* **System Calls:** Direct interaction with the Linux Kernel.
+| Module | Environment | Focus Concepts |
+| :--- | :--- | :--- |
+| **Kernel Entry** | **Zeos** | `entry.S`, Interrupts, Traps, and Context Switching (SAVE_ALL/RESTORE_ALL). |
+| **System Calls** | **Zeos** | Implementing `fork`, `exit`, `write`, `getpid` inside the kernel. |
+| **Scheduling** | **Zeos** | Implementing a Round Robin scheduler, `task_struct` management, and Runqueues. |
+| **Concurrency** | **Linux** | Thread safety, Mutexes, Semaphores, and Monitors (Pthreads). |
 
 ---
 
 ## 📂 Repository Structure
 
-This repository is organized by assignments and distinct learning modules:
+This repository is organized to separate the educational OS development from the Linux exercises:
 
 ```text
 .
-├── 📁 labs/               # Weekly laboratory exercises
-│   ├── lab01_processes    # Fork/Exec/Wait patterns
-│   └── lab02_threads      # Pthreads introduction
-├── 📁 assignments/        # Major graded projects
-│   ├── shell_project/     # Custom Bash-like Shell implementation
-│   └── scheduler/         # CPU Scheduling simulation
-├── 📁 theory/             # Notes and study guides (Markdown/PDF)
-├── 📁 utils/              # Helper libraries and Makefiles
+├── 📁 zeos/               # The Educational OS Source Code
+│   ├── entry.S            # Assembly routines for system calls/interrupts
+│   ├── sys.c              # C implementation of system calls
+│   ├── sched.c            # Scheduler logic and process switching
+│   ├── user.c             # User-space program to test the kernel
+│   └── interrupt.c        # IDT and interrupt handling
+├── 📁 linux_concurrency/  # Standard Linux Synchronization
+│   ├── philosophers/      # Solution to Dining Philosophers
+│   └── producer_consumer/ # Shared buffer implementations
+├── 📁 docs/               # Subject Theory & Diagrams
 └── README.md
