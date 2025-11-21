@@ -273,7 +273,7 @@ unblock_f_return:
     RESTORE_REG
 
     # Check if it returns an error (negative value) 
-    cmpl $0, %eax        # Compare result with 0 
+    cmpl $0, %eax            # Compare result with 0 
     jge unblock_f_end        # If positive or zero, return as is
 
 unblock_f_error:

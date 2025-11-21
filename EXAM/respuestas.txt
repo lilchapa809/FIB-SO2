@@ -1,0 +1,149 @@
+Gerard Chaparro Pérez
+SO2 - Examen Laboratorio 
+
+1.a 
+    /* user-utils.asm */
+    /* int writeTo(int fd, void* buffer, int size, int offset) */
+    ENTRY(writeTo)
+        pushl %ebp
+        movl %esp, %ebp
+        pushl %ebx;  // Save EBX, ESI and EDI if modified
+        movl $40, %eax // syscall number
+        movl 0x8(%ebp), %ebx;	//fd
+        movl 0xC(%ebp), %ecx;	//buffer
+        movl 0x10(%ebp), %edx;	//size
+        movl 0x14(%ebp), %esi;	//offset
+        call syscall_sysenter
+        popl %ebx
+        test %eax, %eax
+        popl %ebp
+        ret
+
+    /* int readFrom(int fd, void* buffer, int size, int offset) */
+    ENTRY(readFrom)
+        pushl %ebp
+        movl %esp, %ebp
+        pushl %ebx;  // Save EBX, ESI and EDI if modified
+        movl $41, %eax // syscall number
+        movl 0x8(%ebp), %ebx;	//fd
+        movl 0xC(%ebp), %ecx;	//buffer
+        movl 0x10(%ebp), %edx;	//size
+        movl 0x14(%ebp), %esi;	//offset
+        call syscall_sysenter
+        popl %ebx
+        test %eax, %eax
+        popl %ebp
+        ret
+
+1.b 
+    struct communication_struct {
+        int bytes_written; // Número de bytes escritos en la página de información
+        page_table_entry * info_page; // Página de información del proceso
+        struct task_struct * active_writer; // Puntero al proceso escritor activo
+        struct list_head blocked_writers; // Lista de procesos bloqueados para escribir
+    };
+
+    struct task_struct {
+        int PID;
+        ...    
+        struct communication_struct comm;
+    };
+
+1.c 
+    Los cambios en las estructuras del sistema han sido aplicados en los ficheros:
+    - sched.h : Añadida la estructura de communication_struct dentro de task_struct
+    - user-utils.S : Implementación de los wrappers a writeTo y readFrom, 
+        usando la instrucción ENTRY(syscall_name) 
+    - sys_call_table.S : Definición de los números de syscall para writeTo(40) y readFrom(41) 
+    - sys.c : Inicializacion de las nuevas syscalls, posteriormente seran implementadas en sys_writeTo y sys_readFrom
+
+1.d
+    //sched.h 
+    void initializeData(struct task_struct *t);
+
+    //sched.c
+    void initializeData(struct task_struct *t)
+    {
+        t->comm.bytes_written = 0;
+        t->comm.info_page = (page_table_entry *)NULL;   // Página de información: NULL (no asignada ni mapeada)
+        t->comm.active_writer = (struct task_struct *)NULL;
+        INIT_LIST_HEAD(&t->comm.blocked_writers);
+    }
+
+1.e
+    //mm_address.h
+    #define COMM_PAGE_ADDR 0x3FF000
+    #define COMM_PAGE_ID (COMM_PAGE_ADDR >> 12) // 0x3FF000 / 0x1000 = 0x3FF (1023)
+
+    #define READ_COMM_PAGE_ADDR  0x3FD000
+    #define READ_COMM_PAGE_ID (READ_COMM_PAGE_ADDR >> 12) // 0x3FD000 / 0x1000 = 0x3FD (1021)
+    
+    //mm.h 
+    void mapPhysicalPageFrom(struct task_struct *t, unsigned int address);
+
+    //mm.c 
+    void mapPhysicalPageFrom(struct task_struct *t, unsigned int address)
+    {
+        //Obtener TP del proceso, marco fisico 
+        page_table_entry * process_PT =  get_PT(t);
+
+        //Obtener TP del proceso actual
+        page_table_entry * current_PT = get_PT(current());
+
+        //Obtener el frame de la pagina logica COMM_PAGE_LOG del proceso t
+        unsigned int frame = get_frame(process_PT, COMM_PAGE_ID);
+        
+        //Mapear la pagina fisica en la direccion logica COMM_PAGE_LOG del proceso actual
+        set_ss_pag(current_PT, COMM_PAGE_ID, frame);
+        
+        //Flush tlb
+        set_cr3(get_DIR(current()));
+    }
+
+1.f
+    //mm.h
+    void unmapPage(struct task_struct *t, unsigned int address);
+
+    //mm.c
+    void unmapPage(struct task_struct *t, unsigned int address)
+    {
+    //Obtener TP del proceso actual
+    page_table_entry * current_PT = get_PT(current());
+    //Desmapear la pagina y flush tlb 
+    del_ss_pag(current_PT, COMM_PAGE_ID);
+    set_cr3(get_DIR(current()));
+    }
+
+1.g
+    //sys.c 
+    void sys_writeTo() ...
+    (en el archivo)
+1.h 
+    //sys.c
+    void sys_readFrom() ...
+    (en el archivo)
+1.i 
+    Los cambios aplicados afectan a la llamada sys_fork ya que habra que copiar la nueva 
+    estructura communication_struct al crear el nuevo proceso hijo.
+
+==============================================0
+
+2.a 
+    make gdb
+    (gdb)b switch_stack
+    (gdb)r 
+    (gdb)i r esp
+
+2.b
+
+
+2.c
+
+
+2.d
+
+
+2.e
+
+
+2.f
