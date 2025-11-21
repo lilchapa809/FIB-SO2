@@ -3,7 +3,7 @@
   <h1>💻 Operating Systems II (SO2)</h1>
   
   <p>
-    <strong>Bachelors in Computer Science | [Your University Name]</strong>
+    <strong>Bachelors in Computer Science | Polytechnic University of Catalonia - FIB</strong>
   </p>
 
   <p>
