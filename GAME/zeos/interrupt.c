@@ -1,27 +1,26 @@
-/*
- * interrupt.c -
- */
+/* interrupt.c - */
 #include <types.h>
 #include <interrupt.h>
 #include <segment.h>
 #include <hardware.h>
 #include <io.h>
-
 #include <sched.h>
-
 #include <zeos_interrupt.h>
 
+// Include the new keyboard header
+#include <keyboard.h> 
+
 Gate idt[IDT_ENTRIES];
-Register    idtR;
+Register idtR;
 
 char char_map[] =
 {
   '\0','\0','1','2','3','4','5','6',
-  '7','8','9','0','\'','ก','\0','\0',
+  '7','8','9','0','\'','ยก','\0','\0',
   'q','w','e','r','t','y','u','i',
   'o','p','`','+','\0','\0','a','s',
-  'd','f','g','h','j','k','l','๑',
-  '\0','บ','\0','็','z','x','c','v',
+  'd','f','g','h','j','k','l','รฑ',
+  '\0','ยบ','\0','รง','z','x','c','v',
   'b','n','m',',','.','-','\0','*',
   '\0','\0','\0','\0','\0','\0','\0','\0',
   '\0','\0','\0','\0','\0','\0','\0','7',
@@ -33,34 +32,83 @@ char char_map[] =
 
 int zeos_ticks = 0;
 
+// Global keyboard buffer instance
+struct keyboard_buffer k_buffer;
+
+// Initialize the keyboard buffer
+void keyboard_init()
+{
+    k_buffer.head = 0;
+    k_buffer.tail = 0;
+}
+
+// Keyboard interrupt service routine
+void keyboard_routine()
+{
+  unsigned char c = inb(0x60); // Read scancode from port 0x60
+  int make;
+  
+  // Check if it is a Make (press) or Break (release) code
+  if (c & 0x80) { // If bit 7 is 1, it is a Break code
+      make = 0;
+      c &= 0x7F; // Clear bit 7 to get the raw scancode
+  } else {
+      make = 1;
+  }
+
+  // Calculate the next head position
+  int next_head = (k_buffer.head + 1) % KB_BUFFER_SIZE;
+
+  // Circular Buffer Logic:
+  // If next_head equals tail, the buffer is full. Drop the event.
+  if (next_head != k_buffer.tail) {
+      // Store the event in the buffer
+      k_buffer.events[k_buffer.head].scancode = c;
+      k_buffer.events[k_buffer.head].pressed = make;
+      
+      // Update the head pointer
+      k_buffer.head = next_head;
+  }
+}
+
 void clock_routine()
 {
   zeos_show_clock();
   zeos_ticks ++;
+
+  // === TEMPORARY TEST FOR MILESTONE 1 ===
+  // We act as a consumer to verify the buffer works
+  if (k_buffer.head != k_buffer.tail) {
+      
+      // 1. Get the event from the tail
+      struct event_t ev = k_buffer.events[k_buffer.tail];
+      
+      // 2. Advance the tail (consume the event)
+      k_buffer.tail = (k_buffer.tail + 1) % KB_BUFFER_SIZE;
+      
+      // 3. Visual feedback: Print if pressed
+      if (ev.pressed) {
+          char c = char_map[(unsigned char)ev.scancode];
+          
+          if (c != '\0') {
+              printk("Buffer OK: ");
+              printc(c);
+              printc('\n');
+          } else {
+              printk("Buffer OK: [Special Key]\n");
+          }
+      }
+  }
+  // === END OF TEST ===
   
   schedule();
 }
 
-void keyboard_routine()
-{
-  unsigned char c = inb(0x60);
-  
-  if (c&0x80) printc_xy(0, 0, char_map[c&0x7f]);
-}
-
+// ... (Resto del archivo: setInterruptHandler, setIdt, etc. se mantienen igual) ...
 void setInterruptHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 {
-  /***********************************************************************/
-  /* THE INTERRUPTION GATE FLAGS:                          R1: pg. 5-11  */
-  /* ***************************                                         */
-  /* flags = x xx 0x110 000 ?????                                        */
-  /*         |  |  |                                                     */
-  /*         |  |   \ D = Size of gate: 1 = 32 bits; 0 = 16 bits         */
-  /*         |   \ DPL = Num. higher PL from which it is accessible      */
-  /*          \ P = Segment Present bit                                  */
-  /***********************************************************************/
   Word flags = (Word)(maxAccessibleFromPL << 13);
-  flags |= 0x8E00;    /* P = 1, D = 1, Type = 1110 (Interrupt Gate) */
+  flags |= 0x8E00;    
 
   idt[vector].lowOffset       = lowWord((DWord)handler);
   idt[vector].segmentSelector = __KERNEL_CS;
@@ -70,21 +118,8 @@ void setInterruptHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 
 void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 {
-  /***********************************************************************/
-  /* THE TRAP GATE FLAGS:                                  R1: pg. 5-11  */
-  /* ********************                                                */
-  /* flags = x xx 0x111 000 ?????                                        */
-  /*         |  |  |                                                     */
-  /*         |  |   \ D = Size of gate: 1 = 32 bits; 0 = 16 bits         */
-  /*         |   \ DPL = Num. higher PL from which it is accessible      */
-  /*          \ P = Segment Present bit                                  */
-  /***********************************************************************/
   Word flags = (Word)(maxAccessibleFromPL << 13);
-
-  //flags |= 0x8F00;    /* P = 1, D = 1, Type = 1111 (Trap Gate) */
-  /* Changed to 0x8e00 to convert it to an 'interrupt gate' and so
-     the system calls will be thread-safe. */
-  flags |= 0x8E00;    /* P = 1, D = 1, Type = 1110 (Interrupt Gate) */
+  flags |= 0x8E00;   
 
   idt[vector].lowOffset       = lowWord((DWord)handler);
   idt[vector].segmentSelector = __KERNEL_CS;
@@ -107,13 +142,11 @@ void setSysenter()
 
 void setIdt()
 {
-  /* Program interrups/exception service routines */
   idtR.base  = (DWord)idt;
   idtR.limit = IDT_ENTRIES * sizeof(Gate) - 1;
   
   set_handlers();
 
-  /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
   setInterruptHandler(32, clock_handler, 0);
   setInterruptHandler(33, keyboard_handler, 0);
 
@@ -121,4 +154,3 @@ void setIdt()
 
   set_idt_reg(&idtR);
 }
-
