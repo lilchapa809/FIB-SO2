@@ -1,0 +1,148 @@
+SOLUCION
+
+1.a
+WRAPPERS normales con EAX=40 y 41 respectivamente
+
+1.b
+struct pipe {
+    int frame; //physical frame to store data
+    int numbytes; //number of bytes in page
+    struct task_struct* readingFrom; //active writer
+    struct list_head writers;//list of pending writers
+};
+
+1.c
+Modificar sys_call_table añadiendo las entradas necesarias
+En el PCB>
+...
+struct pipe pipeinfo;
+...
+
+1.d
+void initializeData(struct task_struct*p) {
+    p->pipeinfo.frame = alloc_frame();
+    p->pipeinfo,numbytes=0;
+    p->readingFrom = NULL;
+    INIT_LIST_HEAD(&p->pipeinfo.writers);
+}
+
+1.e
+int mapPhysicalPageFrom(struct task_struct* p, int address) {
+    int frame = p->pipeinfo.frame;
+    page_table_entry *myPT = get_PT(current());
+    set_ss_page(myPT, address>>12, frame);
+}
+
+1.f
+int unmapPage(struct task_struct*p, int address) {
+    page_table_entry *myPT = get_PT(current());
+    del_ss_page(myPT, address>>12);
+    set_cr3(get_DIR(p));
+}
+
+1.g
+int sys_writeTo(int pid, char* src, int size) {
+    struct task_struct*p = findTaskByPid(pid);
+    if (p->state = BLOCKED && readingFrom=NULL) //Unblock READER
+            update_process_state(p, &readyqueue);
+    
+    //BLOCK
+    update_process_state(current(),&p->pipeinfo.writers);
+    sched_next();
+    
+    mapPhysicalPageFrom(p, 0x3FF000);
+    copy_data(src, 0x3FF000, size);
+    p->pipeinfo = size;
+    unmapPage(current(), 0x3FF000);
+    update_process_state(p, &readyqueue); //Unblock READER
+    
+    return size;
+}
+
+1.h
+int sys_recvFrom(int* pid, char* dst){
+    if (list_empty(&current()->pipeinfo.writers)) {
+            update_process_state(current(), &blockedq);
+            sched_next();//BLOCK Generic
+    }
+
+    t = list_first(&current()->pipeinfo.writers)
+    struct task_struct* p = list_head_2_task_struct(t),
+    readingFrom = p;
+    update_process_state(p, &ready)//Unblock WRITER
+    update_process_state(current(), &blockedq)
+    sched_next()// Block Generic
+    
+    int size = current()->pipeinfo.numbytes;
+    mapPhysicalPageFrom(current(), 0x3FD000);
+    copy_data(0x3FD000, dst, size);
+    unmapPage(current(), 0x3FD000);
+    
+    readingFrom = NULL; // Read COMPLETED!
+    
+    *pid = t->pid; //copy_to_user(pid, &t->pid, sizeof(int));
+    return size;
+}
+
+1.i
+init_task1
+    initializeData(task1);
+
+fork
+    initializeData(newchild);
+
+exit
+    free_frame(current()->pipeinfo.frame);
+    //unblock writers
+    for_each_safe(p, tmp, current()->pipeinfo.writers) {
+        list_del(p);
+        update_process_state(list_head_2_task_struct(p),&readyqueue);
+}
+
+---------------------------------------------------------------
+
+2.a
+
+2n par, 1r par, @ret, EBP, EBX, ESI, EDI
+gdb system; break switch_stack; pila
+
+2.b
+
+sched.o: sched.c
+gcc ...
+
+2.c
+ENTRY(switch_stack)
+    pushl %ebp
+    movl %esp, %ebp
+    pushl %ebx
+    pushl %esi
+    pushl %edi
+    movl 8(%ebp), %eax
+    movl %esp, (%eax)
+    movl 12(%ebp), %eax
+    movl (%eax), %esp
+    popl %edi
+    popl %esi
+    popl %ebx
+    popl %ebp
+    ret
+
+2.d
+2n par, 1r par, @ret, EBP, EBX, ESI, EDI
+
+2.e
+Hay que modificar el init_idle para inicializar la pila con
+variables dummy para los 3 registros y guardar el puntero al
+3r registro en el PCB.
+
+2.f
+Hay que inicializar en el fork el CONTEXTO del hijo, así como
+el punto de entrada en el pcb
+uchild->task.register_esp=register_ebp - 4 * sizeof(DWord);
+int* ctxt = (int*)uchild->task.register_esp;
+ctxt[0] = 0; //EBX
+ctxt[1] = 0; //ESI
+ctxt[2] = 0; //EDI
+ctxt[3] = register_ebp; //EBP
+ctxt[4] = (int)&ret_from_fork;
