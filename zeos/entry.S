@@ -51,3 +51,30 @@
       movl %edx, %ds;           \
       movl %edx, %es
 
+//Pop the registers added in the System Stack in reverse order
+#define RESTORE_ALL \ 
+      popl %edx; \
+      popl %ecx; \
+      popl %ebx; \
+      popl %esi; \
+      popl %edi; \
+      popl %ebp; \
+      popl %eax; \
+      popl %ds; \
+      popl %es; \
+      popl %fs; \
+      popl %gs;
+
+// End Of Interruption 
+#define EOI             \
+      movb $0x20, %al ; \
+      outb %al, $0x20;
+
+//Clock Handler
+ENTRY(clock_handler)          // Assembly header
+      SAVE_ALL                // Save the context
+      EOI                     //* End of interruption we notify the system that we received          *
+                              //* and treated the interruption, so we can receive new interruptions. *\
+      call clock_routine;     // Call the clock routine in C --> interrupt.c
+      RESTORE_ALL             // Restore the context
+      iret;                   // Return from the interruption to user mode

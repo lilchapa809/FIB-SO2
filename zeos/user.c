@@ -4,6 +4,12 @@ char buff[24];
 
 int pid;
 
+//Testing function to test the GDB connection and the clock interrupt
+void testing_gdb() {
+  int i;
+  for (i = 0; i < 1000; ++i) asm("nop"); 
+} 
+
 int __attribute__ ((__section__(".text.main")))
   main(void)
 {
@@ -11,5 +17,7 @@ int __attribute__ ((__section__(".text.main")))
      /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
 
     
-  while(1) { }
+  while(1) { 
+    testing_gdb();
+  }
 }

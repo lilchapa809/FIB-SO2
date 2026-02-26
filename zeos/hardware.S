@@ -91,12 +91,15 @@ ENTRY(return_gate)
  *
  *   x = 0 -> enabled
  *   x = 1 -> disabled
+ *   
+ *   1111 1110 -> 0xFE -> only timer enabled   
  */
+
 // void enable_int(void)
 ENTRY(enable_int)
     pushl %ebp
     movl %esp, %ebp
-    movb $0xff, %al /* 0xFF = 11111111 -> all bits disabled */
+    movb $0xfc, %al /* 0xFF = 11111111 -> all bits disabled */
     outb %al, $0x21
     call delay
     sti

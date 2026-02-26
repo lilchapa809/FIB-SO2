@@ -1,0 +1,10 @@
+Changes Made to the ZeOS Kernel:
+
+1. Implemented the macros RESTORE_ALL and EOI in wrappers.S to restore the context and signal the end of an interruption, respectively.
+2. Implemented the clock_routine
+    1. Added the clock_routine function in interrupt.c to display the clock information.
+        - Also declared in interrupt.h.
+    2. Added the clock_handler in entry.S to handle clock interrupts and call the clock_routine.
+    3. Initialize the entry of clock interrupt in the IDT[32] in interrupt.c 
+        - With setInterruptHandler(32, clock_handler, 0);
+    4. Enable the clock interrupt (timer) in hardware.S by enabling the corresponding bit in "enable_int" function.

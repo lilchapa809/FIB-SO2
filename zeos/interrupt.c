@@ -1,5 +1,5 @@
 /*
- * interrupt.c -
+ * interrupt.c - IDT init and Service Routines for Interruptiosn and Exceptions
  */
 #include <types.h>
 #include <interrupt.h>
@@ -15,11 +15,11 @@ Register    idtR;
 char char_map[] =
 {
   '\0','\0','1','2','3','4','5','6',
-  '7','8','9','0','\'','¡','\0','\0',
+  '7','8','9','0','\'','ï¿½','\0','\0',
   'q','w','e','r','t','y','u','i',
   'o','p','`','+','\0','\0','a','s',
-  'd','f','g','h','j','k','l','ñ',
-  '\0','º','\0','ç','z','x','c','v',
+  'd','f','g','h','j','k','l','ï¿½',
+  '\0','ï¿½','\0','ï¿½','z','x','c','v',
   'b','n','m',',','.','-','\0','*',
   '\0','\0','\0','\0','\0','\0','\0','\0',
   '\0','\0','\0','\0','\0','\0','\0','7',
@@ -73,6 +73,10 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
   idt[vector].highOffset      = highWord((DWord)handler);
 }
 
+void clock_routine()
+{
+  zeos_show_clock(); 
+}
 
 void setIdt()
 {
@@ -83,6 +87,9 @@ void setIdt()
   set_handlers();
 
   /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
+
+  //Clock Interrupt
+  setInterruptHandler(32, clock_handler, 0); //We must declare clock_handler in interrupt.h
 
   set_idt_reg(&idtR);
 }
