@@ -99,7 +99,7 @@ ENTRY(return_gate)
 ENTRY(enable_int)
     pushl %ebp
     movl %esp, %ebp
-    movb $0xfc, %al /* 0xFF = 11111111 -> all bits disabled */
+    movb $0xfe, %al /* 0xFF = 11111111 -> all bits disabled */
     outb %al, $0x21
     call delay
     sti
