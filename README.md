@@ -5,10 +5,9 @@
   <p>
     <strong>Bachelors in Computer Science | Polytechnic University of Catalonia - FIB</strong>
   </p>
-
-  <p>
-    <a href="https://github.com/yourusername/repo/graphs/contributors">
-      <img src="https://img.shields.io/badge/Contributors-1-blue?style=for-the-badge" />
+  
+  <a href="https://github.com/lilchapa809/FIB-SO2/graphs/contributors">
+      <img src="https://img.shields.io/badge/Contributors-2-blue?style=for-the-badge" />
     </a>
     <a href="https://img.shields.io/badge/Language-C-blue?style=for-the-badge&logo=c">
       <img src="https://img.shields.io/badge/Language-C-blue?style=for-the-badge&logo=c" />
@@ -59,13 +58,19 @@ This repository is organized to separate the educational OS development from the
 │       ├── 📂 include/                 # Kernel Header files (.h)
 │       │   ├── entry.h                 # Defines for saving/restoring context
 │       │   ├── sched.h                 # Task struct & runqueue definitions
+|       |   ├── libc.h                  # System call headers
 │       │   └── ...
-│       ├── 📜 entry.S                  # (CRITICAL) ASM Interrupt Handlers & Context Switch
+│       ├── 📜 entry.S                  # Entry points to the system (handlers)
 │       ├── 📜 sched.c                  # (CRITICAL) Round Robin Scheduler & Task Management
 │       ├── 📜 sys.c                    # (CRITICAL) System Calls (fork, exit, write, etc.)
 │       ├── 📜 user.c                   # User-space code to test the kernel features
+│       ├── 📜 system.c                 # System initialization (main)
 │       ├── 📜 interrupt.c              # IDT (Interrupt Descriptor Table) setup
+│       ├── 📜 device.c                 # Device dependent part of the system calls
+│       ├── 📜 wrappers.S               # System call wrappers
+|       ├── 📜 libc.c                   # Other user level code provided by the OS (perror, errno, ...)
 │       ├── 📜 mm.c                     # Memory Management (Paging/Frames)
+|       ├── 📜 io.c                     # Basic management of input/output
 │       ├── 📜 system.lds               # Linker script (defines kernel memory map)
 │       └── ...
 │
@@ -90,3 +95,4 @@ This repository is organized to separate the educational OS development from the
 │       └── 📄 Project.pdf              # Documentation of the game mechanics
 │
 └── 📄 README.md                        # Documentation
+
