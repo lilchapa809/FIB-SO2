@@ -13,8 +13,13 @@
 
 #include <sched.h>
 
+#include "errno.h"
+
 #define LECTURA 0
 #define ESCRIPTURA 1
+
+// Defined in interrupt.c
+extern int zeos_ticks;
 
 int check_fd(int fd, int permissions)
 {
@@ -26,4 +31,9 @@ int check_fd(int fd, int permissions)
 int sys_ni_syscall()
 {
 	return -38; /*ENOSYS*/
+}
+
+int sys_gettime()
+{
+  return zeos_ticks;
 }

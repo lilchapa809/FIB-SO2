@@ -1,5 +1,6 @@
 Changes Made to the ZeOS Kernel:
 
+
 1. Implemented the macros RESTORE_ALL and EOI in entry.S to restore the context and signal the end of an interruption, respectively.
 2. Implemented the clock_routine
     1. Added the clock_routine function in interrupt.c to display the clock information.
@@ -9,3 +10,29 @@ Changes Made to the ZeOS Kernel:
         - With setInterruptHandler(32, clock_handler, 0);
     4. Enable the clock interrupt (timer) in hardware.S by enabling the corresponding bit in "enable_int" function.
 
+3. Creating syscall support
+    1. Added the system_call_handler in entry.S (given by the zeos.pdf)
+        - Single entry point for all syscalls
+    2. Modify the IDT initialization in interrupt.c 
+        - Entry point 0x80, and PL=3 (user level)
+        - With setTrapHandler(0x80, system_call_handler, 3);
+    3. Declared the system_call_handler in interrupt.h
+    4. Created wrappers.S and added to Makefile line 71.
+
+4. Creating syscall gettime();
+    - Relevant files (by order): wrappers.S, sys_call_table.S, interrupt.h, interrupt.c, wrappers.S, sys.c  
+    1. Added the entry sys_gettime (position 10) inside sys_call_table.S
+    2. Declared and defined a global var zeos_ticks inside interrupt.h (as extern) and interrupt.c 
+    3. zeos_ticks initialized to 0 inside the main system.c
+    4. Modified the clock_routine to increase the zeos_ticks
+    5. Modified the wrappers.S to add the wrapper for gettime
+        - Created parameter passing macros
+        - Implemented the wrapper for gettime
+    6. Implemented the sys_gettime function in sys.c to return the value of zeos_ticks
+    7. Added a test for gettime in user.c to check that it works correctly
+    
+
+5. Added error handling
+    1. Added the header errno.h (from: https://chromium.googlesource.com/chromiumos/docs/+/master/constants/errnos.md)
+    2. Included errno.h in entry.S and sys.c 
+    3. To implement void perror(void) in libc.c when write is done
