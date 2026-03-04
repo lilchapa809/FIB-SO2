@@ -13,10 +13,10 @@ int __attribute__ ((__section__(".text.main")))
     
   while(1) { 
     int i = gettime();
-    for (int j = 0; j < 10000000; j++) __asm__ __volatile__ ("");
+    for (int j = 0; j < 1000000; j++) asm ("");
     int j = gettime();
     //Utilitzo aquesta linia per fer saltar una excepcio en cas de que j <= i
     //Per comprovar que gettime funciona be
-    if (j - i <= 0) __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0)); 
+    if (j <= i) __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0)); 
   }
 }
