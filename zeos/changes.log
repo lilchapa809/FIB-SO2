@@ -36,3 +36,9 @@ Changes Made to the ZeOS Kernel:
     1. Added the header errno.h (from: https://chromium.googlesource.com/chromiumos/docs/+/master/constants/errnos.md)
     2. Included errno.h in entry.S and sys.c 
     3. To implement void perror(void) in libc.c when write is done
+
+6. Implemented keyboard interrupt handling
+    1. Added the scan-code to character translation table and the C routine keyboard_routine in interrupt.c to read from port 0x60 and print the pressed key.
+    2. Added the keyboard_handler in entry.S to save/restore context, send EOI and call keyboard_routine.
+    3. Initialized the keyboard interrupt entry in IDT[33] in interrupt.c with setInterruptHandler(33, keyboard_handler, 0).
+    4. Modified enable_int in hardware.S to unmask the keyboard IRQ (set mask 0xFC so timer and keyboard are enabled).

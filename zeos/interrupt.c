@@ -109,7 +109,8 @@ void setIdt()
   //Clock Interrupt
   setInterruptHandler(32, clock_handler, 0); //We must declare clock_handler in interrupt.h
   //Keyboard Interrupt
-  setInterruptHandler(33, keyboard_handler, 0); //We must declare keyboard_handler in interrupt.h
+  setInterruptHandler(33, keyboard_handler, 0);
+
   //Syscall Handler, 3 --> User Level Privilege
   setTrapHandler(0x80, system_call_handler, 3);
   set_idt_reg(&idtR);
