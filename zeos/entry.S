@@ -73,8 +73,17 @@
 //Clock Handler
 ENTRY(clock_handler)          // Assembly header
       SAVE_ALL                // Save the context
-      EOI                     //* End of interruption we notify the system that we received          *
-                              //* and treated the interruption, so we can receive new interruptions. *
+      EOI                     // End of interruption we notify the system that we received          
+                              // and treated the interruption, so we can receive new interruptions
       call clock_routine;     // Call the clock routine in C --> interrupt.c
+      RESTORE_ALL             // Restore the context
+      iret;                   // Return from the interruption to user mode
+
+//Keyboard Handler
+ENTRY(keyboard_handler)       // Assembly header
+      SAVE_ALL                // Save the context
+      EOI                     // End of interruption we notify the system that we received          
+                              // and treated the interruption, so we can receive new interruptions
+      call keyboard_routine;     // Call the keyboard routine in C --> interrupt.c
       RESTORE_ALL             // Restore the context
       iret;                   // Return from the interruption to user mode

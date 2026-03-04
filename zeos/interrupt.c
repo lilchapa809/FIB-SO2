@@ -78,6 +78,17 @@ void clock_routine()
   zeos_show_clock(); 
 }
 
+void keyboard_routine(){
+  unsigned char kb_reg = inb(0x60); //code from keyboard
+  unsigned char is_make = kb_reg & 0x80; //is make or break
+  unsigned char code = kb_reg & 0x7F; //code of the key
+  if(!is_make){
+    char c = char_map[code];
+    if(c != 0) printc_xy(0x00,0x00,c); //print the character
+    else printc_xy(0x00,0x00,'C'); //print 'C' if the character is not found
+  }
+}
+
 void setIdt()
 {
   /* Program interrups/exception service routines */
@@ -90,6 +101,8 @@ void setIdt()
 
   //Clock Interrupt
   setInterruptHandler(32, clock_handler, 0); //We must declare clock_handler in interrupt.h
+  //Keyboard Interrupt
+  setInterruptHandler(33, keyboard_handler, 0); //We must declare keyboard_handler in interrupt.h
 
   set_idt_reg(&idtR);
 }
