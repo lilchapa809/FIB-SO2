@@ -12,6 +12,12 @@
 Gate idt[IDT_ENTRIES];
 Register    idtR;
 
+/** 
+ * Definition of zeos_ticks
+ */
+int zeos_ticks;
+
+
 char char_map[] =
 {
   '\0','\0','1','2','3','4','5','6',
@@ -76,6 +82,7 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 void clock_routine()
 {
   zeos_show_clock(); 
+  ++zeos_ticks;
 }
 
 void keyboard_routine(){
@@ -103,7 +110,8 @@ void setIdt()
   setInterruptHandler(32, clock_handler, 0); //We must declare clock_handler in interrupt.h
   //Keyboard Interrupt
   setInterruptHandler(33, keyboard_handler, 0); //We must declare keyboard_handler in interrupt.h
-
+  //Syscall Handler, 3 --> User Level Privilege
+  setTrapHandler(0x80, system_call_handler, 3);
   set_idt_reg(&idtR);
 }
 

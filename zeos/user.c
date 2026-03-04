@@ -4,12 +4,6 @@ char buff[24];
 
 int pid;
 
-//Testing function to test the GDB connection and the clock interrupt
-void testing_gdb() {
-  int i;
-  for (i = 0; i < 1000; ++i) asm("nop"); 
-} 
-
 int __attribute__ ((__section__(".text.main")))
   main(void)
 {
@@ -18,6 +12,11 @@ int __attribute__ ((__section__(".text.main")))
 
     
   while(1) { 
-    testing_gdb();
+    int i = gettime();
+    for (int j = 0; j < 1000000; j++) asm ("");
+    int j = gettime();
+    //Utilitzo aquesta linia per fer saltar una excepcio en cas de que j <= i
+    //Per comprovar que gettime funciona be
+    if (j <= i) __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0)); 
   }
 }
