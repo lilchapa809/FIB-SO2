@@ -8,17 +8,16 @@ int __attribute__ ((__section__(".text.main")))
   main(void)
 {
 
-  
   int i = gettime();
   for (int j = 0; j < 1000000; j++) asm ("");
   int j = gettime();
 
-  int n = write(1, "Hola mundo\n", 11);
+  int n = write(1, "WRITE TEST\n", 11);
   if (n < 0) {
     perror("write");
   }
 
-  n = write(2, "Esto debe fallar\n", 18);
+  n = write(2, "WRITE TEST ERROR\n", 18);
   if (n < 0) {
     perror("write");
   }
