@@ -13,6 +13,11 @@
 #include <utils.h>
 #include <zeos_mm.h> /* TO BE DELETED WHEN ADDED THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS */
 
+#include <errno.h>
+
+#define SYSENTER_CS_MSR  0x174
+#define SYSENTER_ESP_MSR 0x175
+#define SYSENTER_EIP_MSR 0x176
 
 int (*usr_main)(void) = (void *) (PAG_LOG_INIT_CODE*PAGE_SIZE);
 unsigned int *p_sys_size = (unsigned int *) KERNEL_START;
@@ -46,6 +51,11 @@ int __attribute__((__section__(".text.main")))
   setGdt(); /* Definicio de la taula de segments de memoria */
   setIdt(); /* Definicio del vector de interrupcions */
   setTSS(); /* Definicio de la TSS */
+
+  /* Initialize fast system calls (sysenter/sysexit) */
+  writeMSR(SYSENTER_CS_MSR, __KERNEL_CS);
+  writeMSR(SYSENTER_ESP_MSR, INITIAL_ESP);
+  writeMSR(SYSENTER_EIP_MSR, (DWord) syscall_handler_sysenter);
 
   /* Initialize Memory */
   init_mm();

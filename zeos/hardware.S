@@ -188,3 +188,15 @@ ENTRY(set_seg_regs)
     movl %ecx, %esp
     pushl %edx
     ret
+
+// Write to a Model Specific Register (MSR)
+// void writeMSR(DWord msr, DWord value)
+ENTRY(writeMSR)
+    pushl %ebp
+    movl %esp, %ebp
+    movl 8(%ebp), %ecx     // MSR number
+    movl 12(%ebp), %eax    // value (low 32 bits)
+    xorl %edx, %edx        // high 32 bits = 0
+    wrmsr
+    popl %ebp
+    ret

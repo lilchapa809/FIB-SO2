@@ -25,6 +25,7 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL);
 
 void clock_handler();
 void system_call_handler();
+void syscall_handler_sysenter();
 
 void keyboard_handler();
 

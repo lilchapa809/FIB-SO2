@@ -68,4 +68,6 @@ struct task_struct * current();
  */
 void set_seg_regs(Word data_sel, Word stack_sel, DWord esp);
 
+void writeMSR(DWord msr, DWord value);
+
 #endif  /* __HARDWARE_H__ */

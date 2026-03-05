@@ -6,6 +6,8 @@
 
 #include <types.h>
 
+#include <errno.h>
+
 int errno;
 
 void itoa(int a, char *b)
@@ -41,5 +43,29 @@ int strlen(char *a)
   while (a[i]!=0) i++;
   
   return i;
+}
+
+void perror(const char *s)
+{
+  char *msg;
+
+  switch (errno)
+  {
+    case EBADF:  msg = "Bad file number"; break;
+    case EACCES: msg = "Permission denied"; break;
+    case EFAULT: msg = "Bad address"; break;
+    case EINVAL: msg = "Invalid argument"; break;
+    case ENOSYS: msg = "Function not implemented"; break;
+    default:     msg = "Unknown error"; break;
+  }
+
+  if (s && s[0] != 0)
+  {
+    write(1, (char*)s, strlen((char*)s));
+    write(1, ": ", 2);
+  }
+
+  write(1, msg, strlen(msg));
+  write(1, "\n", 1);
 }
 
