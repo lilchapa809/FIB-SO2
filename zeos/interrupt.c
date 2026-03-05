@@ -81,8 +81,8 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 
 void clock_routine()
 {
-  zeos_show_clock(); 
   ++zeos_ticks;
+  zeos_show_clock(); 
 }
 
 void keyboard_routine(){
