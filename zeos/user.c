@@ -43,9 +43,10 @@ int __attribute__ ((__section__(".text.main")))
    * #(gdb) info line user.c:40
    *    Line 40 of "user.c" starts at address 0x41418d <main+397>
    *    and ends at 0x414192 <main+402>.
-   *
-   *    Process generates a PAGE FAULT exception at EIP: 0x00414192
-   *    Error Code: 0x00000004
+   *    
+   *    Process generates a PAGE FAULT exception
+   *      EIP: 0x00414197
+   *      Error Code: 0x00000006
    */
 
   while(1);
