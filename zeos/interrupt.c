@@ -79,6 +79,21 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
   idt[vector].highOffset      = highWord((DWord)handler);
 }
 
+void hex_convertor(unsigned int address, char *s) 
+{
+  int i;
+  s[8] = '\0';  // Null terminate at position 8 for 8 hex digits
+  for (i = 7; i >= 0; i--) {
+    int digit = address % 16;
+    if (digit < 10) {
+      s[i] = '0' + digit;  // Convert 0-9 to '0'-'9'
+    } else {
+      s[i] = 'A' + digit - 10;  // Convert 10-15 to 'A'-'F'
+    }
+    address /= 16;
+  }
+}
+
 void clock_routine()
 {
   ++zeos_ticks;
@@ -96,6 +111,28 @@ void keyboard_routine(){
   }
 }
 
+// Kernel Stack at this point: error, eip, cs, eflags, esp, ss. 
+// We are only interested in error and eip, so we will ignore the rest of the parameters.
+void my_page_fault_routine(unsigned int error, unsigned int eip)
+{
+  char s[16];
+
+  // Display the instruction pointer that caused the page fault
+  hex_convertor(eip, s);
+  printk("Process generates a PAGE FAULT exception\n");
+  printk("    EIP: 0x"); 
+  printk(s);
+  printc('\n');
+  
+  // Display the page fault error code
+  hex_convertor(error, s);
+  printk("    Error Code: 0x");
+  printk(s);
+  printc('\n');
+
+  while(1); // Halt the system to prevent further damage 
+}
+
 void setIdt()
 {
   /* Program interrups/exception service routines */
@@ -110,6 +147,9 @@ void setIdt()
   setInterruptHandler(32, clock_handler, 0); //We must declare clock_handler in interrupt.h
   //Keyboard Interrupt
   setInterruptHandler(33, keyboard_handler, 0);
+
+  //Page Fault Interrupt
+  setInterruptHandler(14, my_page_fault_handler, 0);
 
   //Syscall Handler, 3 --> User Level Privilege
   setTrapHandler(0x80, system_call_handler, 3);

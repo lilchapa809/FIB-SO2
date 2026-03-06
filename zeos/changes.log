@@ -42,3 +42,8 @@ Changes Made to the ZeOS Kernel:
     2. Added the keyboard_handler in entry.S to save/restore context, send EOI and call keyboard_routine.
     3. Initialized the keyboard interrupt entry in IDT[33] in interrupt.c with setInterruptHandler(33, keyboard_handler, 0).
     4. Modified enable_int in hardware.S to unmask the keyboard IRQ (set mask 0xFC so timer and keyboard are enabled).
+
+7. Implemented Write and sysenter Write
+    ...
+8. Implemented page fault handling
+    ...

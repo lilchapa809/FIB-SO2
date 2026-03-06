@@ -29,6 +29,11 @@ void syscall_handler_sysenter();
 
 void keyboard_handler();
 
+void my_page_fault_handler(unsigned int error, unsigned int eip);
+
+
+void hex_convertor(unsigned int n, char *s);
+
 void setIdt();
 
 #endif  /* __INTERRUPT_H__ */

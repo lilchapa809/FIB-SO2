@@ -70,6 +70,8 @@
       movb $0x20, %al ; \
       outb %al, $0x20;
 
+// ------ SYSCALL HANDLERS INT ------
+
 //Syscall Handler (int 0x80)
 ENTRY(system_call_handler)        // Assembly header
       SAVE_ALL                    // Save the current context
@@ -99,6 +101,35 @@ ENTRY(system_call_handler)        // Assembly header
       movl %EAX, 0x18(%esp)      // Change the EAX value in the stack
       RESTORE_ALL                // Restore the context
       iret
+
+//Clock Handler
+ENTRY(clock_handler)          // Assembly header
+      SAVE_ALL                // Save the context
+      EOI                     // End of interruption we notify the system that we received          
+                              // and treated the interruption, so we can receive new interruptions
+      call clock_routine;     // Call the clock routine in C --> interrupt.c
+      RESTORE_ALL             // Restore the context
+      iret;                   // Return from the interruption to user mode
+
+//Keyboard Handler
+ENTRY(keyboard_handler)       // Assembly header
+      SAVE_ALL                // Save the context
+      EOI                     // End of interruption we notify the system that we received          
+                              // and treated the interruption, so we can receive new interruptions
+      call keyboard_routine;     // Call the keyboard routine in C --> interrupt.c
+      RESTORE_ALL             // Restore the context
+      iret;                   // Return from the interruption to user mode
+
+//Page Fault Handler, needed to get faulting address and error code
+ENTRY(my_page_fault_handler)
+      #SAVE_ALL
+      #EOI
+      call my_page_fault_routine; #infite loop
+      #RESTORE_ALL
+      #/* addl $4,%esp // pop the error code (only certain for exceptions) */
+      #iret;
+
+// ------ SYSCALL HANDLERS SYSENTER ------
 
 // Fast syscall handler (sysenter)
 ENTRY(syscall_handler_sysenter)
@@ -138,20 +169,3 @@ ENTRY(syscall_handler_sysenter)
       sti                      // Enable interrupts again
       sysexit                  // Return to user mode
 
-//Clock Handler
-ENTRY(clock_handler)          // Assembly header
-      SAVE_ALL                // Save the context
-      EOI                     // End of interruption we notify the system that we received          
-                              // and treated the interruption, so we can receive new interruptions
-      call clock_routine;     // Call the clock routine in C --> interrupt.c
-      RESTORE_ALL             // Restore the context
-      iret;                   // Return from the interruption to user mode
-
-//Keyboard Handler
-ENTRY(keyboard_handler)       // Assembly header
-      SAVE_ALL                // Save the context
-      EOI                     // End of interruption we notify the system that we received          
-                              // and treated the interruption, so we can receive new interruptions
-      call keyboard_routine;     // Call the keyboard routine in C --> interrupt.c
-      RESTORE_ALL             // Restore the context
-      iret;                   // Return from the interruption to user mode

@@ -57,8 +57,8 @@ ENTRY(gettime)
     popl %ebp  
     ret  
 
+//Write syscall wrapper using sysenter
 ENTRY(write)
-    // Wrapper for write using sysenter/sysexit
     pushl %ebp
     movl %esp, %ebp
 

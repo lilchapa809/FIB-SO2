@@ -56,3 +56,12 @@ void printk(char *string)
   for (i = 0; string[i]; i++)
     printc(string[i]);
 }
+
+void clear_screen()
+{
+  for (unsigned int i = 0; i < 80; ++i){
+    for (unsigned int j = 0; j < 25; ++j){
+    printc_xy(i,j,' ');
+    }
+  }
+}

@@ -76,6 +76,14 @@ int __attribute__((__section__(".text.main")))
 
   zeos_ticks = 0;
 
+  clear_screen(); //Function added by user to clear first bochs messages
+
+  //Bochs Personalization
+  printk(" <-- Keyborad Routine Key\n");
+  printk("\n---------------------------------\n");
+  printk("SO2 - ZeOs Project\n");
+  printk("Marcel Sanz & Gerard Chaparro\n");
+  printk("---------------------------------\n\n");
   printk("Entering user mode...");
   enable_int();
   /*
