@@ -79,21 +79,8 @@ ENTRY(system_call_handler)        // Assembly header
       jl err                      // If it is, jump to return an error
       cmpl $MAX_SYSCALL, %EAX     // Is syscall greater than MAX_SYSCALL?
       jg err                      // If it is, jump to return an error
-
-      // Prepare up to 3 integer arguments for the C syscall:
-      //   arg1 = fd     (user %ebx, saved at 8(%ebx_base))
-      //   arg2 = buffer (user %ecx, saved at 4(%ebx_base))
-      //   arg3 = size   (user %edx, saved at 0(%ebx_base))
-      movl %esp, %ebx             // Base of saved registers
-      movl 0x00(%ebx), %edx       // size
-      pushl %edx
-      movl 0x04(%ebx), %edx       // buffer
-      pushl %edx
-      movl 0x08(%ebx), %edx       // fd
-      pushl %edx
-
+      
       call *sys_call_table(, %EAX, 0x04) // Call the corresponding service routine
-      addl $12, %esp             // Clean arguments from stack
       jmp fin                    // Finish
   err:
       movl $-ENOSYS, %EAX        // Move to EAX the ENOSYS error
@@ -144,20 +131,7 @@ ENTRY(syscall_handler_sysenter)
       cmpl $MAX_SYSCALL, %EAX  // Is syscall greater than MAX_SYSCALL?
       jg sysenter_err          // If it is, jump to return an error
 
-      // Prepare up to 3 integer arguments for the C syscall (same layout as int 0x80)
-      //   arg1 = fd     (user %ebx, saved at 8(%ebx_base))
-      //   arg2 = buffer (user %ecx, saved at 4(%ebx_base))
-      //   arg3 = size   (user %edx, saved at 0(%ebx_base))
-      movl %esp, %ebx             // Base of saved registers
-      movl 0x00(%ebx), %edx       // size
-      pushl %edx
-      movl 0x04(%ebx), %edx       // buffer
-      pushl %edx
-      movl 0x08(%ebx), %edx       // fd
-      pushl %edx
-
       call *sys_call_table(, %EAX, 0x04) // Call the corresponding service routine
-      addl $12, %esp             // Clean arguments from stack
       jmp sysenter_fin
   sysenter_err:
       movl $-ENOSYS, %EAX      // Move to EAX the ENOSYS error

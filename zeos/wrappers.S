@@ -62,10 +62,16 @@ ENTRY(write)
     pushl %ebp
     movl %esp, %ebp
 
-    // Parameter passing by registers
-    movl 8(%ebp), %ebx     // fd
-    movl 12(%ebp), %ecx    // buffer
-    movl 16(%ebp), %edx    // size
+    //SAVE_REGISTERS
+    pushl %ebx
+    pushl %esi
+    pushl %edi
+    pushl %ecx
+    pushl %edx
+
+    movl 8(%ebp), %edx     // fd -> edx
+    movl 12(%ebp), %ecx    // buffer -> ecx
+    movl 16(%ebp), %ebx    // size -> ebx
     movl $4, %eax          // Syscall identifier for write(4)
 
     // Store return address and create fake dynamic link
@@ -80,7 +86,15 @@ ENTRY(write)
 write_ret:
     // Deshacer el fake frame y restaurar el marco del llamador
     addl $8, %esp           // quitar (old_ebp_fake, write_ret) del tope
-    popl %ebp               // restaurar EBP original del llamador
+
+    //RESTORE_REGISTERS
+    popl %edx
+    popl %ecx
+    popl %edi
+    popl %esi
+    popl %ebx
+
+    popl %ebp
 
     // Process the result
     cmpl $0, %eax          // Is eax(result) negative?
