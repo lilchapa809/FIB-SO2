@@ -200,3 +200,27 @@ ENTRY(writeMSR)
     wrmsr
     popl %ebp
     ret
+
+// void task_switch(union task_union *new)
+ENTRY(task_switch)
+    pushl %ebp
+    movl %esp, %ebp
+    pushl %esi
+    pushl %edi
+    pushl %ebx
+    pushl 8(%ebp)
+    call inner_task_switch
+    addl $4, %esp
+    popl %ebx
+    popl %edi
+    popl %esi
+    popl %ebp
+    ret
+
+// void switch_stack(unsigned long *old_ebp, unsigned long new_ebp)
+ENTRY(switch_stack)
+    movl 4(%esp), %eax
+    movl %ebp, (%eax)
+    movl 8(%esp), %esp
+    popl %ebp
+    ret

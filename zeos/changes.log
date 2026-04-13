@@ -47,3 +47,73 @@ Changes Made to the ZeOS Kernel:
     ...
 8. Implemented page fault handling
     ...
+
+9. Basic process management scaffolding
+    1. Updated sched.h (struct task_struct):
+        - Added ready-queue linkage field (list).
+        - Added process state field (state).
+        - Added saved kernel stack pointer for context switching (kernel_esp).
+        - Kept placeholders for parent/children/quantum/unblock fields as commented TODOs.
+    2. Added scheduler-related public declarations in sched.h:
+        - extern struct list_head readyqueue;
+        - struct task_struct *list_head_to_task_struct(struct list_head *l);
+    3. Updated sched.c:
+        - Declared and defined global ready queue: readyqueue.
+        - Implemented init_sched(void) to initialize readyqueue with INIT_LIST_HEAD.
+        - Implemented list_head_to_task_struct(...) using list_entry(...).
+        - Kept init_task1() and init_idle() as pending stubs.
+
+10. Implemented initial process initialization (init_task1) and aligned boot flow
+    1. Updated sched.h:
+        - Added global declaration: extern struct task_struct *init_task;
+    2. Implemented init_task1(void) in sched.c following Zeos.pdf section 4.4.1:
+        - Allocated frames for page directory, system page table, user page table, and PCB.
+        - Cleared directory/page tables with clear_page_table(...).
+        - Initialized kernel mappings with set_kernel_pages(...) and user mappings with set_user_pages(...).
+        - Identity-mapped process management structures in system PT using set_ss_pag(...).
+        - Mapped PCB page in system PT.
+        - Linked directory[0] to system PT and directory[1] to user PT (user-enabled entry).
+        - Initialized PCB fields for init process (PID=1, dir_pages_baseAddr, state, list head).
+        - Updated TSS kernel stack pointer (tss.esp0) and SYSENTER ESP MSR (0x175).
+        - Activated init address space with set_cr3(...).
+        - Stored global pointer to init process in init_task.
+    3. Updated system.c to follow Zeos.pdf section 4.4.3:
+        - Removed the call to prepare_mono_address_space() to avoid monoprocess initialization in multitasking flow.
+
+11. Implemented idle process initialization (init_idle)
+    1. Updated sched.h:
+        - Added global declaration: extern struct task_struct *idle_task;
+    2. Implemented init_idle(void) in sched.c following Zeos.pdf section 4.4.2:
+        - Allocated one frame for idle page directory and one frame for idle PCB.
+        - Reused init process system page table (no user page table for idle).
+        - Cleared idle directory and linked its first entry to the shared system page table.
+        - Mapped idle directory and idle PCB in the system page table using set_ss_pag(...).
+        - Initialized idle PCB fields (PID=0, dir_pages_baseAddr, state, list head).
+        - Prepared initial kernel stack context to start at cpu_idle:
+            - return address = &cpu_idle
+            - initial EBP value = 0
+            - kernel_esp points to the saved initial EBP slot
+        - Stored global pointer to idle process in idle_task.
+
+12. Implemented process switch (task_switch + inner_task_switch)
+    1. Updated sched.h:
+        - Added process switch function declarations:
+            - void task_switch(union task_union *new);
+            - void inner_task_switch(union task_union *new);
+            - void switch_stack(unsigned long *old_ebp, unsigned long new_ebp);
+    2. Implemented inner_task_switch(void) in sched.c following Zeos.pdf section 4.5:
+        - Updated TSS.esp0 to point to the new task kernel stack.
+        - Updated SYSENTER_ESP_MSR (0x175) with the new kernel stack.
+        - Changed active address space with set_cr3(get_DIR(&new->task)).
+        - Called switch_stack(&current()->kernel_esp, new->task.kernel_esp) to save/restore stack context.
+    3. Implemented low-level context switch helpers in hardware.S:
+        - task_switch:
+            - Saves callee-saved registers (esi, edi, ebx),
+            - Calls inner_task_switch(new),
+            - Restores registers and returns.
+        - switch_stack:
+            - Stores current EBP into *old_ebp,
+            - Loads ESP from new_ebp,
+            - Restores EBP from the new stack and returns to continue new task execution.
+
+
