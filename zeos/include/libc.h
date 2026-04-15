@@ -11,6 +11,7 @@ void itoa(int a, char *b);
 int strlen(char *a);
 
 int gettime(void);
+int getpid(void);
 int write(int fd, char *buffer, int size);
 
 extern int errno;

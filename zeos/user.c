@@ -35,19 +35,12 @@ int __attribute__ ((__section__(".text.main")))
     perror("write");
   }
 
-  //Generate a page fault by trying to read from an invalid address
-  //char* p = 0;
-  //*p = 'x';
-  
-  /* Using GDB 
-   * #(gdb) info line user.c:40
-   *    Line 40 of "user.c" starts at address 0x41418d <main+397>
-   *    and ends at 0x414192 <main+402>.
-   *    
-   *    Process generates a PAGE FAULT exception
-   *      EIP: 0x00414197
-   *      Error Code: 0x00000006
-   */
+  pid = getpid();
+  write (1, "PID: ", 5);
+  itoa(pid, buff);
+  write (1, buff, strlen(buff));
+  write (1, "\n", 1);
+
 
   while(1);
 }

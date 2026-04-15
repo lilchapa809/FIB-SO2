@@ -77,8 +77,8 @@ ENTRY(system_call_handler)        // Assembly header
       SAVE_ALL                    // Save the current context
       cmpl $0, %EAX               // Is syscall number negative?
       jl err                      // If it is, jump to return an error
-      cmpl $MAX_SYSCALL, %EAX     // Is syscall greater than MAX_SYSCALL?
-      jg err                      // If it is, jump to return an error
+      cmpl $MAX_SYSCALL, %EAX     // Is syscall >= MAX_SYSCALL?
+      jge err                     // If it is, jump to return an error
       
       call *sys_call_table(, %EAX, 0x04) // Call the corresponding service routine
       jmp fin                    // Finish
@@ -128,8 +128,8 @@ ENTRY(syscall_handler_sysenter)
       SAVE_ALL                 // Save full context and switch to kernel segments
       cmpl $0, %EAX            // Is syscall number negative?
       jl sysenter_err          // If it is, jump to return an error
-      cmpl $MAX_SYSCALL, %EAX  // Is syscall greater than MAX_SYSCALL?
-      jg sysenter_err          // If it is, jump to return an error
+      cmpl $MAX_SYSCALL, %EAX  // Is syscall >= MAX_SYSCALL?
+      jge sysenter_err         // If it is, jump to return an error
 
       call *sys_call_table(, %EAX, 0x04) // Call the corresponding service routine
       jmp sysenter_fin

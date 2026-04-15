@@ -106,3 +106,28 @@ write_ret:
 
 write_fin:
     ret
+
+
+ENTRY(getpid)
+    pushl %ebp
+    movl %esp, %ebp
+
+    SAVE_REGISTERS
+
+    movl $20, %eax
+    int $0x80
+
+    cmpl $0, %eax
+    jge getpid_fin
+
+getpid_error:
+    negl %eax
+    movl %eax, errno
+    movl $-1, %eax
+
+getpid_fin:
+    RESTORE_REGISTERS
+    movl %ebp, %esp
+    popl %ebp
+    ret
+    
